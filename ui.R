@@ -27,9 +27,7 @@ YYYY.MM.DD Month PFE DATA, the YYYY.MM convention is critical a that is how the 
     checkboxInput("confirm", 
                   "Please confirm Excel docs are named beginning with YYYY.MM structure and that the first sheet is correct.",
                   value = FALSE),
-    checkboxInput("removefinalNAs", 
-                  "Remove hospitals that have never reported (i.e. started as NAs and never stopped being NA), recommended.",
-                  value = TRUE),
+    
     # the submit button 
     actionButton(inputId = "submit", label = "Run Program"),
     
