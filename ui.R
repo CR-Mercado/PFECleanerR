@@ -32,12 +32,12 @@ YYYY.MM.DD Month PFE DATA, the YYYY.MM convention is critical a that is how the 
     actionButton(inputId = "submit", label = "Run Program"),
     
     # download the cleaned spreadsheet. 
-    downloadButton("get.data", label = "Download to csv")
+    downloadButton("downloadData", label = "Download to csv")
            ),
     
     # 
     mainPanel(
-      tableOutput("the.spreadsheet")
+      dataTableOutput("the.spreadsheet")
     )
   )
 ))

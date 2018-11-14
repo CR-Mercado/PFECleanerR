@@ -31,7 +31,8 @@ shinyServer(function(input, output, session) {
     for(i in inFile$datapath){  # go to each datapath and add an index column before combining 
     temp.xl <- read_xlsx(i, 
                          sheet = 1,
-                         col_types = "text") # all the columns will be text for now. 
+                         col_types = "text") # all the columns will be text for now.
+    temp.xl$ahaid[is.na(temp.xl$ahaid)] <- "--"
     temp.xl$Time <- as.integer(j) # add the index 
     spreadsheet <- rbind(spreadsheet, temp.xl) # combine the data into a single object. 
       j <- j+1        # Time increases by 1 for each file. 
@@ -61,16 +62,16 @@ shinyServer(function(input, output, session) {
     spreadsheet
     })   # this is the wrap for eventReactive
   
-  output$the.spreadsheet <- renderTable({
-   head(df())
+  output$the.spreadsheet <- renderDataTable({
+   df()
   })
   
-  output$get.data <- downloadHandler(
+  output$downloadData <- downloadHandler(
     filename = function() { 
       paste("FinalData",".csv",sep="")
               },
-    content = function(file) { 
-      write.csv(df(),file,row.names = FALSE)
+    content = function(con) { 
+      write.csv(df(),con,row.names = FALSE)
               }
       )
       
@@ -128,7 +129,8 @@ imputer <- function(thedata, idcols, indexer, imputecol){
   ### this is deprecated for tibbles, which is fine, since there is already an integer check on the indexer.  
   rownames(.data) <- 1:nrow(.data)
   
-  # creates a matrix  of row & cols location NAs in the data 
+  # creates a matrix  of row & cols location NAs in the data     ### this really should have been only nas in the IMPUTE COLUMN 
+  # I found that there was an error where if the ahaIDs were NA than non-NA index columns would appear as NA 
   .nalocals <- which(is.na(.data), 
                      arr.ind = TRUE)
   
@@ -151,10 +153,13 @@ imputer <- function(thedata, idcols, indexer, imputecol){
   .nalocals$index <- .data[[indexer]][.nalocals$row]  # cannot use $ operator to get the indexer column due to environments.  
   
   #' for each na row go up a until !na then assign. 
+  #' only do this if the impute col in the narow is also NA.  There is an issue related to ahaIds being NA but 
+  #' the impute col not being NA that leads to errors. 
   #' because we are accessing a column based on an argument, for data based on an argument. we use [[]] 
   for(i in .nalocals$row){ 
     temp.index <- .data[[indexer]][i]
     if(temp.index > 1){
+      if(is.na(.data[[imputecol]][i]))
       .data[[imputecol]][i] <- .data[[imputecol]][i-1]
     }
     else next 
